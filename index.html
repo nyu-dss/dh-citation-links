@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+
+    <title>DH Citation Links</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.0/dist/js/bootstrap.min.js"></script>
+    
+
+    <!-- zc 2/10/21 to save json output locally; https://github.com/josdejong/jsoneditor/blob/master/examples/04_load_and_save.html -->
+    <script src="http://cdn.jsdelivr.net/g/filesaver.js"></script>
+
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.0/dist/css/bootstrap.min.css"> -->
+    <!-- some simple styles, bootstrap makes an unbelievable mess -->
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+
+  <body>
+
+    <h1>DH Citation Links</h1>
+
+    <nav class="links">
+    <div id='editor_holder'></div>
+    <button id='submit'>Submit article data</button>
+    <br /><br />
+    <input type="button" id="saveDocument" value="Save session data" />
+    <br /><br /><br />
+
+    <script type="text/javascript">
+      // Initialize array for data
+      var articleData = new Array();
+      // Initialize the editor with a JSON schema
+      var editor = new JSONEditor(document.getElementById('editor_holder'),{
+        "schema": {
+          "title": "Article",
+          "type": "object",
+          "required": [
+            "article_URL",
+            "article_pubDate",
+            "article_authorLN",
+            "article_title",
+            "article_publication",
+            "links"
+          ],
+          "properties": {
+            "article_URL": {
+              "title": "Article URL (link to article)",
+              "type": "string",
+              // "description": "Link to article",
+              "minLength": 4,
+            },
+            "article_pubDate": {
+              "title": "Publication Date (year)",
+              "type": "integer",
+              "minimum": 1980,
+              "maximum": 2021,
+              // "description": "Year of publication"
+            },
+            "article_authorLN": {
+              "title": "First Author, Last Name",
+              "type": "string",
+              // "description": "Last Name, First Name",
+            },
+            "article_authorFN": {
+              "title": "First Author, First Name",
+              "type": "string",
+              // "description": "Last Name, First Name",
+            },
+            "article_title": {
+              "title": "Article Title",
+              "type": "string",
+              // "description": "Title of article",
+              "default": ""
+            },
+            "article_publication": {
+              "title": "Publication",
+              "type": "string",
+              "enum": [
+                "DHQ",
+                "DSH",
+                "Le Champ Numérique"
+              ]
+            },
+            "links": {
+              "type": "array",
+              "format": "table",
+              "title": "Links",
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "link_citation": {
+                    "title": "Full citation",
+                    "type": "string"
+                  },
+                  "link_URL": {
+                    "title": "Link URL",
+                    "type": "string"
+                  },
+                  "link_status": {
+                    "type": "string",
+                    "title": "Link Status",
+                    "enum": [
+                      "page exists",
+                      "page exists, redirected",
+                      "page exists, but different",
+                      "page doesn't exist, site exists",
+                      "page doesn't exist, site doesn't exist",
+                      "other"
+                    ]
+                  }
+                }
+              },
+              "default": [
+                    {
+                      "link_citation": "",
+                      "link_URL": "",
+                      "link_status": "page exists"
+                    }
+                  ]
+            }
+          }
+        }
+      });
+
+      // Hook up the submit button to save article data
+      // https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
+      document.getElementById('submit').addEventListener('click',function() {
+        // put the data - editor.getValue - in local storage
+        localStorage.setItem(editor.getValue(), JSON.stringify(editor.getValue()));
+        // call data from local storage into the browser(?), and make as a string in order to store in array
+        var retrievedObjectString = JSON.stringify(localStorage.getItem(editor.getValue()));
+        // add data as a string to array
+        articleData.push(retrievedObjectString);
+      });
+
+      // Save array data locally
+      document.getElementById('saveDocument').onclick = function () {
+        // Save Dialog
+        let fname = window.prompt("Save as:")
+
+        // Check json extension in file name
+        if (fname.indexOf(".") === -1) {
+          fname = fname + ".json"
+        } else {
+          if (fname.split('.').pop().toLowerCase() === "json") {
+            // Nothing to do
+          } else {
+            fname = fname.split('.')[0] + ".json"
+          }
+        }
+        // format data as object and save file
+        var blob = new Blob([articleData], {type: "text/plain;charset=utf-8"});
+        saveAs(blob, fname);
+        // for (var i = 0; i < articleData.length; i++){
+        //   console.log(JSON.parse(articleData[i]));
+        // }
+      }
+    </script>
+  </body>
+</html>
