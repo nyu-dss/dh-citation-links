@@ -9,6 +9,14 @@ to use:
 - when you are finished entering data, click the "save session data" button. this prompts you to save all data on your local computer as a .json file.
 - note that you will have separate .json files for each data entry session.
 
+data cleanup:
+once you've saved the data from the form, there are a few additional clean-up steps required to create valid json:
+- the output file has a quotation mark (") as the very first and very last character in the file. replace the opening quotation mark with an opening square bracket (\[), and replace the closing quotation mark with a closing square bracket (])
+- if the output file contains multiple objects (i.e. you clicked "submit article data" multiple times before clicking "save session data"), then you'll need to also remove some additional and extraneous quotation marks. in short, run the following find & replace query,
+find: `}","{`
+replace: `},{`
+- remove all backslashes (\). if your data legitmately contains backslashes, you have my sympathy.
+
 to fix:
 - clear form after submit
 - would be nice to continuously append to same file
